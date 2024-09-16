@@ -43,13 +43,7 @@ jobs:
         with:
           java-version: 17
           distribution: 'temurin'
-      # Install Node
-      - name: Setup Node on this machine
-        uses: actions/setup-node@v3.6.0
-        with:
-          node-version: 18
-      - name: Setup Node on this machine
-        run: npm i mobbdev
+
        # Fortify Setup
       - name: Install Debricked and FCLI
         uses: fortify/github-action/setup@v1
@@ -62,50 +56,57 @@ jobs:
           vuln-exporter: skip
           bugtracker-utility: skip
           debricked-cli: latest
+          
        # Printa Utils
       - name: Utilitários Instalados
         run: |
           java -version
           fcli -V
           debricked -v
-       # Loga no SSC/SC-SAST
-       
+          
+     # Loga no SSC/SC-SAST
       - name: Login Fortify SSC/SC-SAST Controller  
         run: |
           fcli ssc session login --url=${{ secrets.SSC_URL }} --ci-token=${{ secrets.SSC_TOKEN }}
           fcli sc-sast session login --client-auth-token=${{ secrets.CLIENT_AUTH_TOKEN }} --ssc-url=${{ secrets.SSC_URL }} --ssc-ci-token=${{ secrets.SSC_TOKEN }}
-       # Loga no SSC/SC-SAST
-#      - name: Preparação do Pacote Fortify  
-#        run: scancentral package --build-tool msbuild -o APP.zip
-#      - name: Envio Fortify  
-#        run: fcli sc-sast scan start --package-file=APP.zip --sensor-version=24.2 --publish-to ${{ env.App-Version  }} --ssc-ci-token=${{ secrets.SSC_TOKEN }} --store job:jobToken
-       # Debricked
-#      - name: Debricked Scan
-#        run: debricked scan -t ${{ secrets.DEBRICKED_TOKEN }} -r=${{ env.App-Version  }} --commit=${{ env.GITHUB_RUN_ID }}
-#      - name: Importa os Resultados Debricked no SSC  
-#        run: fcli ssc artifact import-debricked -t ${{ secrets.DEBRICKED_TOKEN }} --av=${{ env.App-Version  }} -r=${{ env.App-Version  }} --branch=$GITHUB_REF_NAME
-       # Espera Scan
-#      - name: Espera Scan Fortify Acabar  
-#        run: fcli sc-sast scan wait-for --any-ssc-state PROCESS_COMPLETE --timeout 2h ::job::jobToken
-      - name: Consulta ID do Ultimo Artefacto
+      
+      # Loga no SSC/SC-SAST
+      - name: Preparação do Pacote Fortify  
+        run: scancentral package --build-tool msbuild -o APP.zip
+      - name: Envio Fortify  
+        run: fcli sc-sast scan start --package-file=APP.zip --sensor-version=24.2 --publish-to ${{ env.App-Version  }} --ssc-ci-token=${{ secrets.SSC_TOKEN }} --store job:jobToken
+      
+      # Debricked
+      - name: Debricked Scan
+        run: debricked scan -t ${{ secrets.DEBRICKED_TOKEN }} -r=${{ env.App-Version  }} --commit=${{ env.GITHUB_RUN_ID }}
+      - name: Importa os Resultados Debricked no SSC  
+        run: fcli ssc artifact import-debricked -t ${{ secrets.DEBRICKED_TOKEN }} --av=${{ env.App-Version  }} -r=${{ env.App-Version  }} --branch=$GITHUB_REF_NAME
+      
+      # Espera Scan
+      - name: Espera Scan Fortify Acabar  
+        run: fcli sc-sast scan wait-for --any-ssc-state PROCESS_COMPLETE --timeout 2h ::job::jobToken
+      
+      - name: Consulta ID do Ultimo Artefato
         run: fcli ssc artifact list --appversion ${{ env.App-Version  }} --query "['scanTypes'].contains('SCA')" --output 'expr={id}\n' > out.txt
       - name: Recuperação do Ultimo Artefacto Scaneado
         run: |
          $ARTIFACTID = Get-Content out.txt -First 1
          fcli ssc artifact download "$ARTIFACTID" -f='app.fpr'
-      # Moob.AI
-      - name: Archive fpr
+         
+      # Mobb Upload FPR
+      - name: Upload FPR => Mobb
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: fpr
           path: app.fpr
-
-      - name: Run Mobb on the findings and get fixes
+          
+     # Mobb Fixer
+      - name: Executa Mobb Fixer
         if: always()
-        uses: mobb-dev/action/review@v1.1
+        uses: mobb-dev/action@v1
         with:
           report-file: "app.fpr"
           api-key: ${{ secrets.MOBB_API_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          scanner: fortify
+          # scanner: fortify
