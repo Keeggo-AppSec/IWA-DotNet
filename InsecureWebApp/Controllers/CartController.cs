@@ -81,7 +81,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
 
 
         [HttpGet("CompareProducts")]
-        public Product CompareProduct([FromQuery]Product a, [FromForm]Product b)
+        public Product CompareProduct([Bind("Available,Code,Description,HtmlContent,ID,Image,InStock,Name,OnSale,Price,Rating,SalePrice,Summary,TimeToStock")] [FromQuery]Product a, [Bind("Available,Code,Description,HtmlContent,ID,Image,InStock,Name,OnSale,Price,Rating,SalePrice,Summary,TimeToStock")] [FromForm]Product b)
         {
             Type contractType = typeof(ICart);
             Type implementedContract = typeof(ICart);
