@@ -13,7 +13,7 @@
 #
 ################################################################################################################################################
 
-name: Debricked + Fortify SAST + Moob.Ai
+name: Debricked + Fortify SAST + Moob.Ai (Pull Request)
 
 # Gatilho de Disparo
 on:
