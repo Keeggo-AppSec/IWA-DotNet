@@ -97,7 +97,7 @@ jobs:
 #         fcli ssc artifact download $var -f='app.fpr'
 
       - name: SSC issues to GitHub using FortifyVulnerabilityExporter
-        run: FortifyVulnerabilityExporter SSCToGitHub --ssc.baseUrl=${{ secrets.SSC_URL }} --ssc.authToken=${{ secrets.SSC_TOKEN }} --ssc.version.name=${{ env.App-Version  }}
+        run: FortifyVulnerabilityExporter SSCToGitHub --ssc.baseUrl=${{ secrets.SSC_URL }} --ssc.authToken=${{ secrets.SSC_OPEN_TOKEN }} --ssc.version.name=${{ env.App-Version  }}
           
       # Uploaded the generated file containing Fortify vulnerabilities to GitHub.
       - uses: github/codeql-action/upload-sarif@v1
