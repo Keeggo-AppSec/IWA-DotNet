@@ -53,7 +53,7 @@ jobs:
           fcli: latest
           sc-client: 23.2
           fod-uploader: skip
-          vuln-exporter: skip
+          vuln-exporter: latest
           bugtracker-utility: skip
           debricked-cli: latest
           
@@ -64,7 +64,7 @@ jobs:
           fcli -V
           debricked -v
           
-     # Loga no SSC/SC-SAST
+      # Loga no SSC/SC-SAST
       - name: Login Fortify SSC/SC-SAST Controller  
         run: |
           fcli ssc session login --url=${{ secrets.SSC_URL }} --ci-token=${{ secrets.SSC_TOKEN }}
@@ -95,7 +95,15 @@ jobs:
 #        run: |
 #         $var = Get-Content .\out.txt -First 1
 #         fcli ssc artifact download $var -f='app.fpr'
-         
+
+      - name: SSC issues to GitHub using FortifyVulnerabilityExporter
+        run: java -jar FortifyVulnerabilityExporter.jar SSCToGitHub --ssc.baseUrl=${{ secrets.SSC_URL }} --ssc.authToken=${{ secrets.SSC_TOKEN }} --ssc.version.name=${{ env.App-Version  }}
+          
+      # Uploaded the generated file containing Fortify vulnerabilities to GitHub.
+      - uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ./gh-fortify-sast.sarif
+      
       # Mobb Upload FPR
       - name: Upload FPR => Mobb
         if: always()
