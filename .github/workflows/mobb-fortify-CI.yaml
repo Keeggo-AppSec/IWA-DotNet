@@ -73,8 +73,8 @@ jobs:
       # Loga no SSC/SC-SAST
       - name: Preparação do Pacote Fortify  
         run: scancentral package --build-tool msbuild -o APP.zip
-      - name: Envio Fortify  
-        run: fcli sc-sast scan start --package-file=APP.zip --sensor-version=24.2 --publish-to=${{ env.App-Version  }} --ssc-ci-token=${{ secrets.SSC_TOKEN }} --store=job:jobToken
+#      - name: Envio Fortify  
+#        run: fcli sc-sast scan start --package-file=APP.zip --sensor-version=24.2 --publish-to=${{ env.App-Version  }} --ssc-ci-token=${{ secrets.SSC_TOKEN }} --store=job:jobToken
       
       # Debricked
       - name: Debricked Scan
@@ -82,9 +82,9 @@ jobs:
       - name: Importa os Resultados Debricked no SSC  
         run: fcli ssc artifact import-debricked -t ${{ secrets.DEBRICKED_TOKEN }} --av=${{ env.App-Version  }} -r=${{ env.App-Version  }} --branch=$GITHUB_REF_NAME
       
-      # Espera Scan
-      - name: Espera Scan Fortify Acabar  
-        run: fcli sc-sast scan wait-for --any-ssc-state=PROCESS_COMPLETE --timeout=2h ::job::jobToken
+#      # Espera Scan
+#      - name: Espera Scan Fortify Acabar  
+#        run: fcli sc-sast scan wait-for --any-ssc-state=PROCESS_COMPLETE --timeout=2h ::job::jobToken
       
       - name: Obtenção dos Resultados da Análise
         run: |
@@ -97,7 +97,7 @@ jobs:
 #         fcli ssc artifact download $var -f='app.fpr'
 
       - name: SSC issues to GitHub using FortifyVulnerabilityExporter
-        run: java -jar FortifyVulnerabilityExporter.jar SSCToGitHub --ssc.baseUrl=${{ secrets.SSC_URL }} --ssc.authToken=${{ secrets.SSC_TOKEN }} --ssc.version.name=${{ env.App-Version  }}
+        run: FortifyVulnerabilityExporter SSCToGitHub --ssc.baseUrl=${{ secrets.SSC_URL }} --ssc.authToken=${{ secrets.SSC_TOKEN }} --ssc.version.name=${{ env.App-Version  }}
           
       # Uploaded the generated file containing Fortify vulnerabilities to GitHub.
       - uses: github/codeql-action/upload-sarif@v1
