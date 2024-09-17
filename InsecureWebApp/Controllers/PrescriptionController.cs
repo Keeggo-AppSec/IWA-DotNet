@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Text.RegularExpressions;
 
 namespace MicroFocus.InsecureWebApp.Controllers
 {
@@ -103,7 +104,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
         public FileResult DownloadFile(string fileName)
         {
             //Build the File Path.
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Prescriptions" + Path.DirectorySeparatorChar) + fileName;
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "Files"+ Path.DirectorySeparatorChar +"Prescriptions" + Path.DirectorySeparatorChar) + Regex.Replace(Convert.ToString(fileName), "([/\\\\:*?\"<>|])|(^\\s)|([.\\s]$)", "_").Replace("\0", "");
 
             //Read the File data into Byte Array.
             byte[] bytes = System.IO.File.ReadAllBytes(path);
