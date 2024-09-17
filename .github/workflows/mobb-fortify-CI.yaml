@@ -87,7 +87,10 @@ jobs:
         run: fcli sc-sast scan wait-for --any-ssc-state=PROCESS_COMPLETE --timeout=2h ::job::jobToken
       
       - name: Obtenção dos Resultados da Análise
-        run: fcli ssc appversion download-state --include-sources --file='app.fpr' ${{ env.App-Version  }}
+        run: |
+         fcli ssc appversion refresh-metrics ${{ env.App-Version  }}
+         fcli ssc issue list --appversion=${{ env.App-Version  }}
+         fcli ssc appversion download-state --include-sources --file='app.fpr' ${{ env.App-Version  }}
 #      - name: Recuperação do Ultimo Artefacto Scaneado
 #        run: |
 #         $var = Get-Content .\out.txt -First 1
