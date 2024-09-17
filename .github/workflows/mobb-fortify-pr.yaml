@@ -6,14 +6,14 @@
 #
 # Stack de Ferramentas de App Sec:
 # - Checkout do Código
-# - Debricked - Analise de SCA (Componente de Terceiros)
-# - Fortify SAST - Analise de Segurança de Código
-# - Moob.IA - Security IA SmartFix
+# - Debricked - Analise de Componente de Terceiros
+# - Fortify Static Code Analyzer - Analise Estática
+# - Mobb Fixer - Correção Automatizada de Código
 #
 #
 ################################################################################################################################################
 
-name: Debricked + Fortify SAST + Moob.Ai (Pull Request)
+name: Debricked + Fortify + Mobb (Pull Request)
 
 # Gatilho de Disparo
 on:
@@ -72,7 +72,7 @@ jobs:
           fcli ssc session login --url=${{ secrets.SSC_URL }} --ci-token=${{ secrets.SSC_TOKEN }}
           fcli sc-sast session login --client-auth-token=${{ secrets.CLIENT_AUTH_TOKEN }} --ssc-url=${{ secrets.SSC_URL }} --ssc-ci-token=${{ secrets.SSC_TOKEN }}
       
-      # Loga no SSC/SC-SAST
+      # Empacotamento da Aplicação
       - name: Preparação do Pacote Fortify  
         run: scancentral package --build-tool msbuild -o APP.zip
       - name: Envio Fortify  
@@ -84,16 +84,18 @@ jobs:
       - name: Importa os Resultados Debricked no SSC  
         run: fcli ssc artifact import-debricked -t ${{ secrets.DEBRICKED_TOKEN }} --av=${{ env.App-Version  }} -r=${{ env.App-Version  }} --branch=$GITHUB_REF_NAME
       
-      # Espera Scan
+      # Fortify
       - name: Espera Scan Fortify Acabar  
         run: fcli sc-sast scan wait-for --any-ssc-state PROCESS_COMPLETE --timeout 2h ::job::jobToken
       
-      - name: Consulta ID do Ultimo Artefato
-        run: fcli ssc artifact list --appversion ${{ env.App-Version  }} --query "['scanTypes'].contains('SCA')" --output 'expr={id}\n' > out.txt
-      - name: Recuperação do Ultimo Artefacto Scaneado
-        run: |
-         $var = Get-Content .\out.txt -First 1
-         fcli ssc artifact download $var -f='app.fpr'
+#      - name: Consulta ID do Ultimo Artefato
+#        run: fcli ssc artifact list --appversion ${{ env.App-Version  }} --query "['scanTypes'].contains('SCA')" --output 'expr={id}\n' > out.txt
+#      - name: Recuperação do Ultimo Artefacto Scaneado
+#        run: |
+#         $var = Get-Content .\out.txt -First 1
+#         fcli ssc artifact download $var -f='app.fpr'
+      - name: Obtenção dos Resultados da Análise
+        run: fcli ssc appversion download-state --include-sources --file='app.fpr' ${{ env.App-Version  }}
          
       # Mobb Upload FPR
       - name: Upload FPR => Mobb
