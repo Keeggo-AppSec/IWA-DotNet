@@ -100,9 +100,10 @@ jobs:
         run: FortifyVulnerabilityExporter SSCToGitHub --ssc.baseUrl=${{ secrets.SSC_URL }} --ssc.authToken=${{ secrets.SSC_OPEN_TOKEN }} --ssc.version.name=${{ env.App-Version  }}
           
       # Uploaded the generated file containing Fortify vulnerabilities to GitHub.
-      - uses: github/codeql-action/upload-sarif@v1
+      - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ./gh-fortify-sast.sarif
+          category: Fortify
       
       # Mobb Upload FPR
       - name: Upload FPR => Mobb
