@@ -103,7 +103,7 @@ jobs:
       - uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ./gh-fortify-sast.sarif
-          category: Fortify
+#          category: Fortify
       
       # Mobb Upload FPR
       - name: Upload FPR => Mobb
