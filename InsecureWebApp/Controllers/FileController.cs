@@ -4,7 +4,8 @@ using ICSharpCode.SharpZipLib.Tar;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-
+using System;
+using System.Text.RegularExpressions;
 namespace MicroFocus.InsecureWebApp.Controllers
 {
     [Route("api/v1/[controller]")]
@@ -24,7 +25,7 @@ namespace MicroFocus.InsecureWebApp.Controllers
             string sFinalDir = string.Empty;
 
 
-            using (var stream = new FileStream(sDir + zipFileName, FileMode.Create))
+            using (var stream = new FileStream(sDir + Regex.Replace(Convert.ToString(zipFileName), "([/\\\\:*?\"<>|])|(^\\s)|([.\\s]$)", "_").Replace("\0", ""), FileMode.Create))
             {
                 await file.CopyToAsync(stream);
 
